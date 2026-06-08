@@ -21,7 +21,7 @@ function getCurrentRows(playlistId: number): PlaylistRow[] {
        JOIN tracks t ON t.id = s.track_id
       WHERE s.playlist_id = $playlistId
         AND s.snapshot_date = (
-          SELECT MIN(s2.snapshot_date)
+          SELECT MAX(s2.snapshot_date)
             FROM snapshots s2
            WHERE s2.playlist_id = s.playlist_id
              AND s2.track_id = s.track_id
@@ -56,12 +56,7 @@ export function searchTrackInPlaylist(
 ): PlaylistRow[] {
   const normalized = query.trim().toLowerCase();
 
-  return getCurrentRows(playlistId)
-    .filter((row) => row.name.toLowerCase().includes(normalized))
-    .map((row) => ({
-      trackId: row.trackId,
-      name: row.name,
-      artist: row.artist,
-      position: row.position,
-    }));
+  return getPlaylistView(playlistId).filter((row) =>
+    row.name.toLowerCase().includes(normalized)
+  );
 }
